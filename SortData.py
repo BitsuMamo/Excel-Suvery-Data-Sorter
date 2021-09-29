@@ -50,9 +50,9 @@ class SortData():
         Gets the row sizes of each sheet in sorted worksheet.
     concatenate():
         Concatenated all the data.
-    concatenate_x_y_ele(work_sheet, row:int):
+    concatenate_x_y_ele(row:int):
         concatenates the x, y and elevation of the data.
-    concatenate_all(work_sheet, row:int):
+    concatenate_all(row:int):
         concatenates the x, y and elevation and the catagory, number of the data.
     run():
         Runs the class.
@@ -169,6 +169,7 @@ class SortData():
                             self.unsorted_work_sheet[self.col_ele + str(row)].value,
                             self.unsorted_work_sheet[self.col_cat + str(row)].value]
 
+
                     sorted_work_sheet.append(data)
 
         self.sorted_work_book.save(self.sorted_path)
@@ -195,7 +196,7 @@ class SortData():
     def concatenate(self) -> None:
 
         '''
-        Adds the concatenated string to the worksheet
+        Adds the excel concatenated string to the worksheet
 
             Parameters: None
             Returns: None
@@ -209,6 +210,9 @@ class SortData():
 
             for row in range(1, self.sizes[index]):
                  #ws.cell('A1').value = "=NewSheet!E7 + 123"
+                 #print(self.concatenate_x_y_ele(row))
+                 #print()
+                 #print(self.concatenate_all(row))
                 sorted_work_sheet[self.col_con_1 + str(row)] = self.concatenate_x_y_ele(row)
                 sorted_work_sheet[self.col_con_2 + str(row)] = self.concatenate_all(row)
 
@@ -221,7 +225,7 @@ class SortData():
 
 
         '''
-        Returns a string with the x, y and z concatenated with a comma
+        Returns a string with the x, y and z concatenated with a comma uses if and concatenate excel functions
 
             Parameters:
                 row (int): The row to be concatenated
@@ -229,12 +233,14 @@ class SortData():
                 (str): The concatenated value
         '''
         row = str(row)
-        return f"=CONCATENATE({self.col_x + row},{self.col_y + row},{self.col_ele + row})"
+        return f'=IF(AND({self.col_x + row}>{self.col_x_bound},{self.col_y + row}>{self.col_y_bound}),\
+CONCATENATE({self.col_x + row},",",{self.col_y + row},",",{self.col_ele + row}),\
+CONCATENATE({self.col_y + row},",",{self.col_x + row},",",{self.col_ele + row}))'
 
     def concatenate_all(self,row) -> str:
 
         '''
-        Returns a string with the x, y, z, num, and category concatenated with a comma
+        Returns a string with the x, y, z, num, and category concatenated with a comma uses if and concatenate excel functions
 
             Parameters:
                 row (int): The row to be concatenated
@@ -242,7 +248,9 @@ class SortData():
                 (str): The concatenated value
         '''
         row = str(row)
-        return f"=CONCATENATE({self.col_num + row},{self.col_x + row},{self.col_y + row},{self.col_ele + row},{self.col_cat + row})"
+        return f'=IF(AND({self.col_x + row}>{self.col_x_bound},{self.col_y + row}>{self.col_y_bound}),\
+CONCATENATE({self.col_num + row},",",{self.col_x + row},",",{self.col_y + row},",",{self.col_ele + row},",",{self.col_cat + row}),\
+CONCATENATE({self.col_num + row},",",{self.col_y + row},",",{self.col_x + row},",",{self.col_ele + row},",",{self.col_cat + row}))'
 
     def run(self) -> None:
 
