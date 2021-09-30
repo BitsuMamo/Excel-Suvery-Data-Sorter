@@ -1,7 +1,8 @@
 @ECHO OFF
-set d=%cd%
+
+set d=C:/Sorter
 set file=main.py
-set p=%d%\%file%
+set p=%d%/%file%
 
 
 ECHO ======================

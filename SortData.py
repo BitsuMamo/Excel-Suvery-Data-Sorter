@@ -1,5 +1,6 @@
 from openpyxl import Workbook, load_workbook
-from os import path, remove
+from os import path, remove, makedirs
+from shutil import rmtree
 
 class SortData():
     """
@@ -54,12 +55,14 @@ class SortData():
         concatenates the x, y and elevation of the data.
     concatenate_all(row:int):
         concatenates the x, y and elevation and the catagory, number of the data.
+    create_category_files():
+        creates all the category text file with all the data
     run():
         Runs the class.
 
     """
 
-    def __init__(self, unsorted_path, col_num, col_x,col_x_bound, col_y, col_y_bound, col_ele, col_cat, col_con_1, col_con_2) -> None:
+    def __init__(self, unsorted_path, col_num, col_x, col_y, col_ele, col_cat, col_con_1, col_con_2, col_x_bound, col_y_bound) -> None:
         '''
         Constructor
             Parameters:
@@ -94,6 +97,7 @@ class SortData():
         else:
             self.sorted_path: str = "sorted_" + str(path.basename(self.unsorted_path))
 
+        self.category_path:str = path.join(path.dirname(self.sorted_path), "category_data")
 
         # Opens unsorted workbook if it exists other wise exists application
         if path.exists(self.unsorted_path):
@@ -252,6 +256,40 @@ CONCATENATE({self.col_y + row},",",{self.col_x + row},",",{self.col_ele + row}))
 CONCATENATE({self.col_num + row},",",{self.col_x + row},",",{self.col_y + row},",",{self.col_ele + row},",",{self.col_cat + row}),\
 CONCATENATE({self.col_num + row},",",{self.col_y + row},",",{self.col_x + row},",",{self.col_ele + row},",",{self.col_cat + row}))'
 
+    def create_category_files(self):
+
+        '''
+        Creates notepad files with all the different categories and their data
+
+            Parameters: None
+            Returns: None
+        '''
+
+        print("Creating category files.")
+        self.sorted_work_book = load_workbook(self.sorted_path)
+
+        if path.exists(self.category_path):
+            print("Removing previous category data directory.")
+            rmtree(self.category_path)
+
+        makedirs(self.category_path)
+
+
+        for index, category in enumerate(self.categories):
+            sorted_work_sheet = self.sorted_work_book[category]
+            category_file_name = category + ".txt"
+            category_file = open(path.join(self.category_path, category_file_name), 'w')
+
+            for row in range(1, self.sizes[index]):
+                if float(sorted_work_sheet[self.col_x + str(row)].value) > self.col_x_bound and float(sorted_work_sheet[self.col_y + str(row)].value) > self.col_y_bound:
+                    data = f"{sorted_work_sheet[self.col_num + str(row)].value},{sorted_work_sheet[self.col_x + str(row)].value},{sorted_work_sheet[self.col_y + str(row)].value},{sorted_work_sheet[self.col_ele + str(row)].value},{sorted_work_sheet[self.col_cat + str(row)].value}\n"
+                else:
+                    data = f"{sorted_work_sheet[self.col_num + str(row)].value},{sorted_work_sheet[self.col_y + str(row)].value},{sorted_work_sheet[self.col_x + str(row)].value},{sorted_work_sheet[self.col_ele + str(row)].value},{sorted_work_sheet[self.col_cat + str(row)].value}\n"
+                category_file.writelines(data)
+            category_file.close()
+
+            self.sorted_work_book.close()
+
     def run(self) -> None:
 
         '''
@@ -263,6 +301,8 @@ CONCATENATE({self.col_num + row},",",{self.col_y + row},",",{self.col_x + row},"
         self.get_categories()
         self.sort_data()
         self.concatenate()
+
+        self.create_category_files()
 
         self.unsorted_work_book.close()
         self.sorted_work_book.close()
