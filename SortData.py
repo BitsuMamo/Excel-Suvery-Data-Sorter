@@ -79,6 +79,7 @@ class SortData():
             Return: None
         '''
         self.unsorted_path: str = unsorted_path
+        print(self.unsorted_path)
         self.col_num: str = col_num
         self.col_x: str = col_x
         self.col_x_bound: float = col_x_bound
